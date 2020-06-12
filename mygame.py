@@ -158,17 +158,19 @@ def main():
         heroWidth = 32 #same as height
         max_x = (width - bush - heroWidth)
         min_x = bush
-        max_y = (height - bush - heroWidth)
+        max_y = (height - bush - heroWidth - 2)
         min_y = bush
         
         #adding hero constraints note that bushes are 30 pixels wide
         
-        if(hero.x > (width - bush - heroWidth)): #far right constraint
-            hero.x = 
-        if(hero.x > (width - bush - heroWidth)): #far left constraint
-        if(hero.x > (width - bush - heroWidth)): #top constraint
-        f(hero.x > (width - bush - heroWidth)): #bottom constraint
-        
+        if(hero.x > max_x): #far right constraint
+            hero.x = max_x
+        if(hero.x < min_x): #far left constraint
+            hero.x = min_x
+        if(hero.y < min_y): #top constraint
+            hero.y = min_y
+        if(hero.y > max_y): #bottom constraint
+            hero.y = max_y
         # Draw background
         screen.blit(background_image,(0,0))
         # Game display
