@@ -1,6 +1,6 @@
 import pygame
 import random
-mSpeed = 1
+mSpeed = 2
 gSpeed = 1
 hSpeed = 3
 # class Character():
@@ -46,13 +46,10 @@ class Monster():
     def getWrap(self):
         if(self.x > 512):
             self.x = 0
-
         if(self.x < -30):
             self.x = 512
-
         if(self.y > 480):
             self.y = 0
-
         if(self.y < -32):
             self.y = 480
 
@@ -70,7 +67,7 @@ def main():
     
     #image loading
     background_image = pygame.image.load('images/background.png').convert_alpha() #512x480
-    hero_image = pygame.image.load('images/hero.png').convert_alpha() #30x32
+    hero_image = pygame.image.load('images/hero.png').convert_alpha() #32x32
     monster_image = pygame.image.load('images/monster.png').convert_alpha() #30x32
     
     clock = pygame.time.Clock()
@@ -157,11 +154,20 @@ def main():
             
         # screen wrapping logic
         monster.getWrap()
+        bush = 30
+        heroWidth = 32 #same as height
+        max_x = (width - bush - heroWidth)
+        min_x = bush
+        max_y = (height - bush - heroWidth)
+        min_y = bush
         
-        #keep hero from leaving screen
-        # if(hero.x > (512 - 30 - 30)):
-        #     hero.x = (512 - 30 - 30)
+        #adding hero constraints note that bushes are 30 pixels wide
         
+        if(hero.x > (width - bush - heroWidth)): #far right constraint
+            hero.x = 
+        if(hero.x > (width - bush - heroWidth)): #far left constraint
+        if(hero.x > (width - bush - heroWidth)): #top constraint
+        f(hero.x > (width - bush - heroWidth)): #bottom constraint
         
         # Draw background
         screen.blit(background_image,(0,0))
