@@ -2,6 +2,8 @@ import pygame
 import random
 import math
 
+# work on goblin collision and losing sequence. also character class inheritance and cleaning up code
+
 mSpeed = 2
 gSpeed = 4
 hSpeed = 3
