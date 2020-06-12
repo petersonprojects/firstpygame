@@ -129,11 +129,10 @@ def main():
                 if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                     pressed_right = False
             
-            if event.type == pygame.KEYUP or event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYUP:
                 if event.key == pygame.K_RETURN:
                     restart = True
-                    monsterDead = False
-                    print("Return key pressed.")
+                    monsterdead = False
         #for event loop end
         
         if pressed_left:
@@ -178,6 +177,7 @@ def main():
 
         if(distance < 32):
             monsterdead = True
+            restart = False
 
         # screen wrapping logic
         monster.getWrap()
@@ -215,6 +215,7 @@ def main():
                     monster = Monster(randommonx,randommony)
                     hero = Hero(randomherx, randomhery)
                     spawned = True
+                    restart = False
         #this essentially resfreshes the screen
         pygame.display.update()
 
