@@ -1,13 +1,29 @@
 import pygame
 import random
-speed = 3
-
+mSpeed = 1
+gSpeed = 1
+hSpeed = 3
 # class Character():
 #     def __init__(self, x, y):
 #         self.x = x
 #         self.y = y
-    
+class Hero():
+    def __init__(self, startx, starty):
+        self.x = startx
+        self.y = starty
+        self.name = 'hero'
 
+    def moveRight(self):
+        self.x += hSpeed
+    
+    def moveLeft(self):
+        self.x -= hSpeed
+    
+    def moveUp(self):
+        self.y -= hSpeed
+        
+    def moveDown(self):
+        self.y += hSpeed
 
 class Monster():
     def __init__(self,startx,starty):
@@ -16,16 +32,16 @@ class Monster():
         self.name = 'monster'
     
     def moveRight(self):
-        self.x += speed
+        self.x += mSpeed
     
     def moveLeft(self):
-        self.x -= speed
+        self.x -= mSpeed
     
     def moveUp(self):
-        self.y -= speed
+        self.y -= mSpeed
         
     def moveDown(self):
-        self.y += speed
+        self.y += mSpeed
 
     def getWrap(self):
         if(self.x > 512):
@@ -53,15 +69,19 @@ def main():
     pygame.display.set_caption('My Game')
     
     #image loading
-    background_image = pygame.image.load('images/background.png').convert_alpha()
-    hero_image = pygame.image.load('images/hero.png').convert_alpha()
+    background_image = pygame.image.load('images/background.png').convert_alpha() #512x480
+    hero_image = pygame.image.load('images/hero.png').convert_alpha() #30x32
     monster_image = pygame.image.load('images/monster.png').convert_alpha() #30x32
     
     clock = pygame.time.Clock()
-    #initialize monster
+    #initialize monster, hero and goblins
     monster = Monster(60, 400)
+    hero = Hero(200,200)
     direction = 0
-
+    pressed_left = False
+    pressed_right = False
+    pressed_up = False
+    pressed_down = False
     stop_game = False
     while not stop_game:
         for event in pygame.event.get():
@@ -70,9 +90,43 @@ def main():
             if event.type == pygame.QUIT:
                 stop_game = True
 
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP  or event.key == pygame.K_w:
+                    pressed_up = True
 
+                if event.key == pygame.K_DOWN  or event.key == pygame.K_s:
+                    pressed_down = True
+
+                if event.key == pygame.K_LEFT  or event.key == pygame.K_a:
+                    pressed_left = True
+
+                if event.key == pygame.K_RIGHT  or event.key == pygame.K_d:
+                    pressed_right = True
+
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_UP  or event.key == pygame.K_w:
+                    pressed_up = False
+
+                if event.key == pygame.K_DOWN  or event.key == pygame.K_s:
+                    pressed_down = False
+
+                if event.key == pygame.K_LEFT  or event.key == pygame.K_a:
+                    pressed_left = False
+
+                if event.key == pygame.K_RIGHT  or event.key == pygame.K_d:
+                    pressed_right = False
+                
         # Game logic
         # direction changing logic
+        
+        if pressed_left:
+            hero.moveLeft()
+        if pressed_right:
+            hero.moveRight()
+        if pressed_up:
+            hero.moveUp()
+        if pressed_down:
+            hero.moveDown()
 
         change_dir -= 1
         if(change_dir <= 0):
@@ -90,12 +144,16 @@ def main():
         # screen wrapping logic
         monster.getWrap()
         
+        #keep hero from leaving screen
+        # if(hero.x > (512 - 30 - 30)):
+        #     hero.x = (512 - 30 - 30)
+        
         
         # Draw background
         screen.blit(background_image,(0,0))
         # Game display
 
-        screen.blit(hero_image, (200,200))
+        screen.blit(hero_image, (hero.x,hero.y))
         screen.blit(monster_image, (monster.x,monster.y))
         pygame.display.update()
 
