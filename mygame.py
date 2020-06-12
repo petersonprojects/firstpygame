@@ -83,6 +83,7 @@ def main():
     pressed_up = False
     pressed_down = False
     stop_game = False
+    
     while not stop_game:
         for event in pygame.event.get():
 
@@ -131,7 +132,7 @@ def main():
         change_dir -= 1
         if(change_dir <= 0):
             change_dir = 120
-            direction = random.randint(1,4)
+            direction = random.randint(1,8)
         
         if(direction == 1):
             monster.moveRight()
@@ -141,6 +142,19 @@ def main():
             monster.moveUp()
         elif(direction == 4):
             monster.moveDown()
+        elif(direction == 5): #northeast
+            monster.moveUp()
+            monster.moveRight()
+        elif(direction == 6): #northwest
+            monster.moveUp()
+            monster.moveLeft()
+        elif(direction == 7): #southeast
+            monster.moveDown()
+            monster.moveRight()
+        elif(direction == 8): #southwest
+            monster.moveDown()
+            monster.moveLeft()
+            
         # screen wrapping logic
         monster.getWrap()
         
