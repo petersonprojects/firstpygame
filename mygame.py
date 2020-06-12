@@ -3,7 +3,7 @@ import random
 import math
 
 mSpeed = 2
-gSpeed = 3
+gSpeed = 4
 hSpeed = 3
 
 class Character():
@@ -67,12 +67,38 @@ class Monster():
             self.y = 0
         if(self.y < -32):
             self.y = 480
-
+class Goblin():
+    def __init__(self, startx, starty):
+        self.x = startx
+        self.y = starty
+        self.name = 'goblin'
+    
+    def moveRight(self):
+        self.x += gSpeed
+    
+    def moveLeft(self):
+        self.x -= gSpeed
+    
+    def moveUp(self):
+        self.y -= gSpeed
+        
+    def moveDown(self):
+        self.y += gSpeed
+        
+    def getWrap(self):
+        if(self.x > 512):
+            self.x = 0
+        if(self.x < -30):
+            self.x = 512
+        if(self.y > 480):
+            self.y = 0
+        if(self.y < -32):
+            self.y = 480
 def main():
     # Game initialization
     width = 512
     height = 480
-    change_dir = 120
+    change_dir = 0
 
     pygame.init()
     pygame.mixer.init()
@@ -83,12 +109,14 @@ def main():
     background_image = pygame.image.load('images/background.png').convert_alpha() #512x480
     hero_image = pygame.image.load('images/hero.png').convert_alpha() #32x32
     monster_image = pygame.image.load('images/monster.png').convert_alpha() #30x32
+    goblin_image = pygame.image.load('images/goblin.png').convert_alpha() #32x32
     winSound = pygame.mixer.Sound('sounds/win.wav')
     
     clock = pygame.time.Clock()
     #initialize monster, hero and goblins
 
-    direction = 30
+    direction = 0
+    gobdirection = 0
     pressed_left = False
     pressed_right = False
     pressed_up = False
@@ -100,6 +128,9 @@ def main():
     spawned = False
     monster = Monster(60, 400)
     hero = Hero(200,200)
+    randomgobx = random.randint(0,512)
+    randomgoby = random.randint(0,480)
+    goblin = Goblin(randomgobx,randomgoby)
     
     
     while restart == False or not stop_game:
@@ -145,11 +176,13 @@ def main():
             hero.moveDown()
 
         change_dir -= 1
-        
         if(change_dir <= 0):
             change_dir = 120
             direction = random.randint(1,8)
-        
+        if(change_dir <= 60):
+            change_dir = 120
+            gobdirection = random.randint(1,8)
+            
         if(direction == 1):
             monster.moveRight()
         elif(direction == 2):
@@ -170,6 +203,27 @@ def main():
         elif(direction == 8):
             monster.moveDown()
             monster.moveLeft()
+        
+        if(gobdirection == 1):
+            goblin.moveRight()
+        elif(gobdirection == 2):
+            goblin.moveLeft()
+        elif(gobdirection == 3):
+            goblin.moveUp()
+        elif(gobdirection == 4):
+            goblin.moveDown()
+        elif(gobdirection == 5):
+            goblin.moveUp()
+            goblin.moveRight()
+        elif(gobdirection == 6):
+            goblin.moveUp()
+            goblin.moveLeft()
+        elif(gobdirection == 7):
+            goblin.moveDown()
+            goblin.moveRight()
+        elif(gobdirection == 8):
+            goblin.moveDown()
+            goblin.moveLeft()
             
         
         #collision testing
@@ -181,12 +235,13 @@ def main():
 
         # screen wrapping logic
         monster.getWrap()
+        goblin.getWrap()
         hero.getBorderCollision()
         
         # Draw background
         screen.blit(background_image,(0,0))
         screen.blit(hero_image, (hero.x,hero.y))
-        
+        screen.blit(goblin_image, (goblin.x,goblin.y))
         if(monsterdead == False):
             screen.blit(monster_image, (monster.x,monster.y))
         
