@@ -2,30 +2,30 @@ import pygame
 import random
 speed = 3
 
-class Character():
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        
-    def moveRight(self, x):
-        x += speed
-    
-    def moveLeft(self, x):
-        x -= speed
-    
-    def moveUp(self ,y):
-        y -= speed
-        
-    def moveDown(self, y):
-        y += speed
+# class Character():
+#     def __init__(self, x, y):
+#         self.x = x
+#         self.y = y
     
 
 
-class Monster(Character):
-    def __init__(self):
-        self.x = 60
-        self.y = 400
+class Monster():
+    def __init__(self,startx,starty):
+        self.x = startx
+        self.y = starty
         self.name = 'monster'
+    
+    def moveRight(self):
+        self.x += speed
+    
+    def moveLeft(self):
+        self.x -= speed
+    
+    def moveUp(self):
+        self.y -= speed
+        
+    def moveDown(self):
+        self.y += speed
 
     def getWrap(self):
         if(self.x > 512):
@@ -59,7 +59,7 @@ def main():
     
     clock = pygame.time.Clock()
     #initialize monster
-    monster = Monster()
+    monster = Monster(60, 400)
     direction = 0
 
     stop_game = False
@@ -79,15 +79,14 @@ def main():
             change_dir = 120
             direction = random.randint(1,4)
         
-        if(direction == 1): #go right
-            monster.moveRight(monster.x)
-        elif(direction == 2): #go left
-            monster.moveLeft(monster.x)
-        elif(direction == 3): #go up
-            monster.moveUp(monster.y)
-        elif(direction == 4): #go down
-            monster.moveDown(monster.y)
-            
+        if(direction == 1):
+            monster.moveRight()
+        elif(direction == 2):
+            monster.moveLeft()
+        elif(direction == 3):
+            monster.moveUp()
+        elif(direction == 4):
+            monster.moveDown()
         # screen wrapping logic
         monster.getWrap()
         
@@ -97,7 +96,6 @@ def main():
         # Game display
 
         screen.blit(hero_image, (200,200))
-        print(f'{monster.x} , {monster.y}')
         screen.blit(monster_image, (monster.x,monster.y))
         pygame.display.update()
 
