@@ -1,31 +1,44 @@
 import pygame
 import random
+speed = 3
 
 class Character():
-    speed = 3
     def __init__(self, x, y):
         self.x = x
         self.y = y
-    
-    def moveRight(self):
-        self.x += speed
-    
-    def moveLeft(self):
-        self.x -= speed
-    
-    def moveUp(self):
-        self.y -= speed
         
-    def moveDown(self):
-        self.y += speed
+    def moveRight(self, x):
+        x += speed
+    
+    def moveLeft(self, x):
+        x -= speed
+    
+    def moveUp(self ,y):
+        y -= speed
+        
+    def moveDown(self, y):
+        y += speed
+    
+
 
 class Monster(Character):
-    speed = 3
     def __init__(self):
         self.x = 60
         self.y = 400
         self.name = 'monster'
-        
+
+    def getWrap(self):
+        if(self.x > 512):
+            self.x = 0
+
+        if(self.x < -30):
+            self.x = 512
+
+        if(self.y > 480):
+            self.y = 0
+
+        if(self.y < -32):
+            self.y = 480
 
 def main():
     # Game initialization
@@ -47,7 +60,6 @@ def main():
     clock = pygame.time.Clock()
     #initialize monster
     monster = Monster()
-
     direction = 0
 
     stop_game = False
@@ -61,37 +73,32 @@ def main():
 
         # Game logic
         # direction changing logic
+
         change_dir -= 1
         if(change_dir <= 0):
             change_dir = 120
             direction = random.randint(1,4)
         
         if(direction == 1): #go right
-            monster.moveRight()
+            monster.moveRight(monster.x)
         elif(direction == 2): #go left
-            monster.moveLeft()
+            monster.moveLeft(monster.x)
         elif(direction == 3): #go up
-            monster.moveUp()
+            monster.moveUp(monster.y)
         elif(direction == 4): #go down
-            monsterY.moveDown()
+            monster.moveDown(monster.y)
             
         # screen wrapping logic
-        if(monsterX > 512):
-            monsterX = 0
-        elif monsterX < -30:
-            monsterX = 512
-        if(monsterY > 480):
-            monsterY = 0
-        elif(monsterY < -32):
-            monsterY = 480
+        monster.getWrap()
         
         
         # Draw background
-        screen.fill(blue_color)
-        # Game display
         screen.blit(background_image,(0,0))
+        # Game display
+
         screen.blit(hero_image, (200,200))
-        screen.blit(monster_image, (monsterX,monsterY))
+        print(f'{monster.x} , {monster.y}')
+        screen.blit(monster_image, (monster.x,monster.y))
         pygame.display.update()
 
         clock.tick(60)
