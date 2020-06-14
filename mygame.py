@@ -79,6 +79,7 @@ class Monster(Character):
         self.y = starty
         self.name = 'monster'
         self.speed = speed
+        self.diagSpeed = mSpeed/2
         
     def getWrap(self):
         if(self.x > 512):
@@ -95,12 +96,14 @@ class Goblin(Character):
         self.y = starty
         self.name = 'goblin'
         self.speed = speed
+        self.diagSpeed = gSpeed/2
         
 def main():
     # Game initialization
     width = 512
     height = 480
     change_dir = 0
+    change_gobdir = 0
 
     pygame.init()
     pygame.mixer.init()
@@ -119,6 +122,7 @@ def main():
 
     direction = 0
     gobdirection = 0
+    points = 0
     pressed_left = False
     pressed_right = False
     pressed_up = False
@@ -137,7 +141,7 @@ def main():
     goblin = Goblin(randomgobx,randomgoby, gSpeed)
     
     
-    while restart == False or not stop_game:
+    while not stop_game:
         
         for event in pygame.event.get():
             
@@ -181,11 +185,12 @@ def main():
             hero.moveDown()
 
         change_dir -= 1
+        change_gobdir -= 1
         if(change_dir <= 0):
             change_dir = 120
             direction = random.randint(1,8)
-        if(change_dir <= 60):
-            change_dir = 120
+        if(change_gobdir <= 60):
+            change_gobdir = 120
             gobdirection = random.randint(1,8)
             
         if(direction == 1):
@@ -218,7 +223,7 @@ def main():
         elif(gobdirection == 6):
             goblin.moveNW()
         elif(gobdirection == 7):
-            goblin.moseSE()
+            goblin.moveSE()
         elif(gobdirection == 8):
             goblin.moveSW()
             
@@ -227,13 +232,16 @@ def main():
         mondistance = math.sqrt(((hero.x-monster.x)**2) + ((hero.y-monster.y)**2))
         gobdistance = math.sqrt(((hero.x-goblin.x)**2)+ ((hero.y-goblin.y)**2))
         if(mondistance < 32):
+            points += 1
             monsterdead = True
             restart = False
+            print(f"Points: {points}")
             
         if gobdistance < 32:
             restart = False
             loseSoundPlayed = True
             heroDead = True
+            points = 0
 
         # screen wrapping logic
         monster.getWrap()
@@ -243,7 +251,7 @@ def main():
         # Draw background
         screen.blit(background_image,(0,0))
         
-        if(loseSoundPlayed == False and heroDead == True):
+        if(heroDead == False):
             screen.blit(hero_image, (hero.x,hero.y))
             
         screen.blit(goblin_image, (goblin.x,goblin.y))
@@ -258,7 +266,7 @@ def main():
                 winSoundPlayed = True
         
         if loseSoundPlayed == True:
-            loseSound.set_volume(0,1)
+            loseSound.set_volume(0.1)
             if loseSoundPlayed == False:
                 loseSound.play(loops=0)
                 loseSoundPlayed = True
