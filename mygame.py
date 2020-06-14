@@ -6,16 +6,14 @@ import math
 
 mSpeed = 2
 gSpeed = 4
-hSpeed = 3
+hSpeed = 4
 
 class Character():
-    def __init__(self):
-        pass
-class Hero():
     def __init__(self, startx, starty):
         self.x = startx
         self.y = starty
-        self.name = 'hero'
+        self.type = 'character'
+    
     def moveRight(self):
         self.x += hSpeed
     def moveLeft(self):
@@ -24,6 +22,17 @@ class Hero():
         self.y -= hSpeed
     def moveDown(self):
         self.y += hSpeed
+    def moveNW(self):
+        diagSpeed = hSpeed/2
+        self.x -= hSpeed
+        self.y -= hSpeed
+        
+class Hero(Character):
+    def __init__(self, startx, starty):
+        self.x = startx
+        self.y = starty
+        self.name = 'hero'
+
     def getBorderCollision(self):
         width = 512
         height = 480
@@ -42,7 +51,7 @@ class Hero():
             self.y = min_y
         if(self.y > max_y): #bottom constraint
             self.y = max_y
-class Monster():
+class Monster(Character):
     def __init__(self,startx,starty):
         self.x = startx
         self.y = starty
@@ -69,7 +78,7 @@ class Monster():
             self.y = 0
         if(self.y < -32):
             self.y = 480
-class Goblin():
+class Goblin(Character):
     def __init__(self, startx, starty):
         self.x = startx
         self.y = starty
