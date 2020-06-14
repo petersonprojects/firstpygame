@@ -7,13 +7,14 @@ import math
 mSpeed = 2
 gSpeed = 4
 hSpeed = 4
-
+diagSpeed = 0
 class Character():
-    def __init__(self, startx, starty):
+    def __init__(self, startx, starty, speed):
         self.x = startx
         self.y = starty
         self.type = 'character'
-    
+        self.diagSpeed = hSpeed/2
+        self.speed = speed
     def moveRight(self):
         self.x += hSpeed
     def moveLeft(self):
@@ -23,17 +24,38 @@ class Character():
     def moveDown(self):
         self.y += hSpeed
     def moveNW(self):
-        diagSpeed = hSpeed/2
-        self.x -= hSpeed
-        self.y -= hSpeed
+        self.x -= self.diagSpeed
+        self.y -= self.diagSpeed
+    def moveNE(self):
+        self.x += self.diagSpeed
+        self.y -= self.diagSpeed
+    def moveSW(self):
+        self.x -= self.diagSpeed
+        self.y += self.diagSpeed
+    def moveSE(self):
+        self.x += self.diagSpeed
+        self.y += self.diagSpeed
+    
+    def getWrap(self):
+        
+        if(self.x > 512):
+            self.x = 0
+        if(self.x < -30):
+            self.x = 512
+        if(self.y > 480):
+            self.y = 0
+        if(self.y < -32):
+            self.y = 480
         
 class Hero(Character):
-    def __init__(self, startx, starty):
+    def __init__(self, startx, starty, speed):
         self.x = startx
         self.y = starty
         self.name = 'hero'
+        self.speed = speed
 
     def getBorderCollision(self):
+        
         width = 512
         height = 480
         bush = 30
@@ -52,23 +74,12 @@ class Hero(Character):
         if(self.y > max_y): #bottom constraint
             self.y = max_y
 class Monster(Character):
-    def __init__(self,startx,starty):
+    def __init__(self, startx, starty, speed):
         self.x = startx
         self.y = starty
         self.name = 'monster'
-    
-    def moveRight(self):
-        self.x += mSpeed
-    
-    def moveLeft(self):
-        self.x -= mSpeed
-    
-    def moveUp(self):
-        self.y -= mSpeed
+        self.speed = speed
         
-    def moveDown(self):
-        self.y += mSpeed
-
     def getWrap(self):
         if(self.x > 512):
             self.x = 0
@@ -79,32 +90,12 @@ class Monster(Character):
         if(self.y < -32):
             self.y = 480
 class Goblin(Character):
-    def __init__(self, startx, starty):
+    def __init__(self, startx, starty, speed):
         self.x = startx
         self.y = starty
         self.name = 'goblin'
-    
-    def moveRight(self):
-        self.x += gSpeed
-    
-    def moveLeft(self):
-        self.x -= gSpeed
-    
-    def moveUp(self):
-        self.y -= gSpeed
+        self.speed = speed
         
-    def moveDown(self):
-        self.y += gSpeed
-        
-    def getWrap(self):
-        if(self.x > 512):
-            self.x = 0
-        if(self.x < -30):
-            self.x = 512
-        if(self.y > 480):
-            self.y = 0
-        if(self.y < -32):
-            self.y = 480
 def main():
     # Game initialization
     width = 512
@@ -122,7 +113,7 @@ def main():
     monster_image = pygame.image.load('images/monster.png').convert_alpha() #30x32
     goblin_image = pygame.image.load('images/goblin.png').convert_alpha() #32x32
     winSound = pygame.mixer.Sound('sounds/win.wav')
-    
+    loseSound = pygame.mixer.Sound('sounds/lose.wav')
     clock = pygame.time.Clock()
     #initialize monster, hero and goblins
 
@@ -135,13 +126,15 @@ def main():
     stop_game = False
     monsterdead = False
     winSoundPlayed = False
+    loseSoundPlayed = False
+    heroDead = False
     restart = False
     spawned = False
-    monster = Monster(60, 400)
-    hero = Hero(200,200)
+    monster = Monster(60, 400, mSpeed)
+    hero = Hero(200,200, hSpeed)
     randomgobx = random.randint(0,512)
     randomgoby = random.randint(0,480)
-    goblin = Goblin(randomgobx,randomgoby)
+    goblin = Goblin(randomgobx,randomgoby, gSpeed)
     
     
     while restart == False or not stop_game:
@@ -175,6 +168,7 @@ def main():
                 if event.key == pygame.K_RETURN:
                     restart = True
                     monsterdead = False
+                    heroDead = False
         #for event loop end
         
         if pressed_left:
@@ -203,17 +197,13 @@ def main():
         elif(direction == 4):
             monster.moveDown()
         elif(direction == 5):
-            monster.moveUp()
-            monster.moveRight()
+            monster.moveNE()
         elif(direction == 6):
-            monster.moveUp()
-            monster.moveLeft()
+            monster.moveNW()
         elif(direction == 7):
-            monster.moveDown()
-            monster.moveRight()
+            monster.moveSE()
         elif(direction == 8):
-            monster.moveDown()
-            monster.moveLeft()
+            monster.moveSW()
         
         if(gobdirection == 1):
             goblin.moveRight()
@@ -224,25 +214,26 @@ def main():
         elif(gobdirection == 4):
             goblin.moveDown()
         elif(gobdirection == 5):
-            goblin.moveUp()
-            goblin.moveRight()
+            goblin.moveNE()
         elif(gobdirection == 6):
-            goblin.moveUp()
-            goblin.moveLeft()
+            goblin.moveNW()
         elif(gobdirection == 7):
-            goblin.moveDown()
-            goblin.moveRight()
+            goblin.moseSE()
         elif(gobdirection == 8):
-            goblin.moveDown()
-            goblin.moveLeft()
+            goblin.moveSW()
             
         
         #collision testing
-        distance = math.sqrt(((hero.x-monster.x)**2) + ((hero.y-monster.y)**2))
-
-        if(distance < 32):
+        mondistance = math.sqrt(((hero.x-monster.x)**2) + ((hero.y-monster.y)**2))
+        gobdistance = math.sqrt(((hero.x-goblin.x)**2)+ ((hero.y-goblin.y)**2))
+        if(mondistance < 32):
             monsterdead = True
             restart = False
+            
+        if gobdistance < 32:
+            restart = False
+            loseSoundPlayed = True
+            heroDead = True
 
         # screen wrapping logic
         monster.getWrap()
@@ -251,8 +242,12 @@ def main():
         
         # Draw background
         screen.blit(background_image,(0,0))
-        screen.blit(hero_image, (hero.x,hero.y))
+        
+        if(loseSoundPlayed == False and heroDead == True):
+            screen.blit(hero_image, (hero.x,hero.y))
+            
         screen.blit(goblin_image, (goblin.x,goblin.y))
+        
         if(monsterdead == False):
             screen.blit(monster_image, (monster.x,monster.y))
         
@@ -261,11 +256,16 @@ def main():
             if(winSoundPlayed == False):
                 winSound.play(loops=0)
                 winSoundPlayed = True
-            
+        
+        if loseSoundPlayed == True:
+            loseSound.set_volume(0,1)
+            if loseSoundPlayed == False:
+                loseSound.play(loops=0)
+                loseSoundPlayed = True
+
             if restart == False:
                 font = pygame.font.Font('freesansbold.ttf',32)
                 white = (255,255,255)
-                green = (0,255,0)
                 blue = (0,0,128)
                 text = font.render('Hit Enter to Play Again', True, blue, white)
                 screen.blit(text,(80,220))
@@ -276,10 +276,13 @@ def main():
                 randommony = random.randint(0,480)
                 randomherx = random.randint(30,480)
                 randomhery = random.randint(25,448)
+                randomgobx = random.randint(0,512)
+                randomgoby = random.randint(0,480)
                 
                 if(randommonx != randomherx and randommony != randomherx):
-                    monster = Monster(randommonx,randommony)
-                    hero = Hero(randomherx, randomhery)
+                    monster = Monster(randommonx,randommony, mSpeed)
+                    hero = Hero(randomherx, randomhery, hSpeed)
+                    goblin = Goblin(randomgobx, randomgoby, gSpeed)
                     spawned = True
                     restart = False
         #this essentially resfreshes the screen
