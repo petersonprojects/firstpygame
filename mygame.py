@@ -53,6 +53,10 @@ class Hero(Character):
         self.y = starty
         self.name = 'hero'
         self.speed = speed
+        self.points = 0
+    
+    def addPoint(self, getPoint):
+        self.points += 1
 
     def getBorderCollision(self):
         
@@ -123,6 +127,7 @@ def main():
     direction = 0
     gobdirection = 0
     points = 0
+    getPoint = False
     pressed_left = False
     pressed_right = False
     pressed_up = False
@@ -232,10 +237,15 @@ def main():
         mondistance = math.sqrt(((hero.x-monster.x)**2) + ((hero.y-monster.y)**2))
         gobdistance = math.sqrt(((hero.x-goblin.x)**2)+ ((hero.y-goblin.y)**2))
         if(mondistance < 32):
-            points += 1
+            getPoint = True
             monsterdead = True
             restart = False
-            print(f"Points: {points}")
+        
+        if(getPoint == True):
+            hero.addPoint(getPoint)
+            getPoint = False
+            print(f"Points: {hero.points}")
+            XPBarSize = hero.points
             
         if gobdistance < 32:
             restart = False
@@ -259,12 +269,15 @@ def main():
         if(monsterdead == False):
             screen.blit(monster_image, (monster.x,monster.y))
         
+        ## put xp bar drawing here.
+        #screen.blit( (30,430)
+        
         if(monsterdead == True):
             winSound.set_volume(0.1)
             if(winSoundPlayed == False):
                 winSound.play(loops=0)
                 winSoundPlayed = True
-        
+            
         if loseSoundPlayed == True:
             loseSound.set_volume(0.1)
             if loseSoundPlayed == False:
@@ -297,6 +310,9 @@ def main():
         pygame.display.update()
 
         clock.tick(60) #controls framerate
+
+
+        
 
     if(stop_game == True):
         pygame.quit()
