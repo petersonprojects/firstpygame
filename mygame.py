@@ -2,7 +2,7 @@ import pygame
 import random
 import math
 
-# work on goblin collision and losing sequence. also character class inheritance and cleaning up code
+# work on getting audio to work again and drawin xp bar
 
 mSpeed = 2
 gSpeed = 4
