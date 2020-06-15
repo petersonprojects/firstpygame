@@ -99,7 +99,10 @@ class Goblin(Character):
         self.name = 'goblin'
         self.speed = speed
         self.diagSpeed = gSpeed/2
-        
+        self.gobDirection = 0
+    def getGobDir(self):
+        self.gobdirection = random.randint(1,8)
+        return self.gobdirection
 def main():
     # Game initialization
     width = 512
@@ -135,16 +138,19 @@ def main():
     loseSoundPlayed = False
     heroDead = False
     restart = False
+    levelUp = False
     
     randommonx = random.randint(0,512)
     randommony = random.randint(0,480)
     randomgobx = random.randint(0,512)
     randomgoby = random.randint(0,480)
     
+    randomgobx2 = random.randint(0,512)
+    randomgoby2 = random.randint(0,480)
+    
     hero = Hero(175,175, hSpeed)
-    monster = Monster(60, 400, mSpeed)
-    goblin = Goblin(randomgobx,randomgoby, gSpeed)
-    goblins = []
+    monster = Monster(randommonx, randommony, mSpeed)
+    goblins = [Goblin(randomgobx,randomgoby, gSpeed),Goblin(randomgobx2,randomgoby2, gSpeed)]
     
     while not stop_game:
         
@@ -198,13 +204,10 @@ def main():
             hero.moveDown()
 
         change_dir -= 1
-        change_gobdir -= 1
+        change_gobdir -= 2
         if(change_dir <= 0):
             change_dir = 120
             direction = random.randint(1,8)
-        if(change_gobdir <= 60):
-            change_gobdir = 120
-            gobdirection = random.randint(1,8)
             
         if(direction == 1):
             monster.moveRight()
@@ -223,55 +226,56 @@ def main():
         elif(direction == 8):
             monster.moveSW()
         
-        if(gobdirection == 1):
-            goblin.moveRight()
-        elif(gobdirection == 2):
-            goblin.moveLeft()
-        elif(gobdirection == 3):
-            goblin.moveUp()
-        elif(gobdirection == 4):
-            goblin.moveDown()
-        elif(gobdirection == 5):
-            goblin.moveNE()
-        elif(gobdirection == 6):
-            goblin.moveNW()
-        elif(gobdirection == 7):
-            goblin.moveSE()
-        elif(gobdirection == 8):
-            goblin.moveSW()
-            
-        
-        #collision testing
         mondistance = math.sqrt(((hero.x-monster.x)**2) + ((hero.y-monster.y)**2))
-        gobdistance = math.sqrt(((hero.x-goblin.x)**2)+ ((hero.y-goblin.y)**2))
-        
+        monster.getWrap()
+                        
         if(mondistance < 32):
             monsterdead = True
             
-        if gobdistance < 32:
-            restart = False
-            heroDead = True
-
-        # screen wrapping logic
-        monster.getWrap()
-        goblin.getWrap()
+        for goblin in goblins:
+            gobdirection = random.randint(1,8)
+            
+            if(change_gobdir <= 0):
+                change_gobdir = 120
+                gobdirection = goblin.getGobDir()
+                
+            if(gobdirection == 1):
+                goblin.moveRight()
+            elif(gobdirection == 2):
+                goblin.moveLeft()
+            elif(gobdirection == 3):
+                goblin.moveUp()
+            elif(gobdirection == 4):
+                goblin.moveDown()
+            elif(gobdirection == 5):
+                goblin.moveNE()
+            elif(gobdirection == 6):
+                goblin.moveNW()
+            elif(gobdirection == 7):
+                goblin.moveSE()
+            elif(gobdirection == 8):
+                goblin.moveSW()
+                #collision testing
+    
+            gobdistance = math.sqrt(((hero.x-goblin.x)**2)+ ((hero.y-goblin.y)**2))
+                    
+            if gobdistance < 32:
+                restart = False
+                heroDead = True
+                points = 0
+                goblins.clear()
+                goblins = [Goblin(randomgobx,randomgoby, gSpeed),Goblin(randomgobx2,randomgoby2, gSpeed)]
+            goblin.getWrap()
+            
         hero.getBorderCollision()
         
         # Draw background
         screen.blit(background_image,(0,0))    
-        ## put xp bar drawing here.
-        #screen.blit( (30,430)
-        
-        if(monsterdead == True):
-            winSound.set_volume(0.1)
-            if(winSoundPlayed == False):
-                winSound.play(loops=0)
-                winSoundPlayed = True
             
-            if loseSoundPlayed == True:
-                loseSound.set_volume(0.1)
-                loseSound.play(loops=0)
-                loseSoundPlayed = False
+        if loseSoundPlayed == True:
+            loseSound.set_volume(0.1)
+            loseSound.play(loops=0)
+            loseSoundPlayed = False
 
         if restart == False and heroDead == True:
             font = pygame.font.Font('freesansbold.ttf',32)
@@ -297,17 +301,40 @@ def main():
                     monsterdead = False
                     heroDead = False
         
+        if levelUp == True:
+            goblins.append(Goblin(randomgobx,randomgoby,gSpeed))
+            levelUp = False
+        
         if(heroDead == False):
             screen.blit(hero_image, (hero.x,hero.y))
-            
-        screen.blit(goblin_image, (goblin.x,goblin.y))
         
         if(monsterdead == False):
             screen.blit(monster_image, (monster.x,monster.y))
+                                    
+        for goblin in goblins:
+            screen.blit(goblin_image, (goblin.x,goblin.y))
+                    
         
         #drawXP
-        xpbarX = points*10
-        screen.blit()
+        maxXP = 100
+        if points > 0:
+            xpbarX = points*10
+        elif points == 0:
+            xpbarX = 0
+            
+        yellow = (250, 218, 94)
+        white = (255,255,255)
+        black = (0,0,0)
+        
+        pygame.draw.rect(screen, white, (25,445, maxXP,20))
+        pygame.draw.rect(screen, black, (30,450,maxXP-10,10))
+        
+        if points <= 10:
+            pygame.draw.rect(screen, yellow, (30,450,xpbarX,10))
+        
+        if points == 10:
+            levelUp = True
+            points = 0
         
         #this essentially resfreshes the screen
         pygame.display.update()
