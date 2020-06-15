@@ -100,9 +100,13 @@ class Goblin(Character):
         self.speed = speed
         self.diagSpeed = gSpeed/2
         self.gobDirection = 0
+        
     def getGobDir(self):
-        self.gobdirection = random.randint(1,8)
-        return self.gobdirection
+        return self.gobDirection
+    
+    def setGobDir(self, randInt):
+        self.gobDirection = randInt
+    
 def main():
     # Game initialization
     width = 512
@@ -120,8 +124,8 @@ def main():
     hero_image = pygame.image.load('images/hero.png').convert_alpha() #32x32
     monster_image = pygame.image.load('images/monster.png').convert_alpha() #30x32
     goblin_image = pygame.image.load('images/goblin.png').convert_alpha() #32x32
-    winSound = pygame.mixer.Sound('sounds/win.wav')
-    loseSound = pygame.mixer.Sound('sounds/lose.wav')
+    # winSound = pygame.mixer.Sound('sounds/win.wav')
+    # loseSound = pygame.mixer.Sound('sounds/lose.wav')
     clock = pygame.time.Clock()
     #initialize monster, hero and goblins
 
@@ -144,7 +148,6 @@ def main():
     randommony = random.randint(0,480)
     randomgobx = random.randint(0,512)
     randomgoby = random.randint(0,480)
-    
     randomgobx2 = random.randint(0,512)
     randomgoby2 = random.randint(0,480)
     
@@ -188,16 +191,8 @@ def main():
         
         if pressed_left:
             hero.moveLeft()
-        if pressed_left and pressed_up:
-            hero.moveNW()
         if pressed_right:
             hero.moveRight()
-        if pressed_right and pressed_up:
-            hero.moveNE()
-        if pressed_left and pressed_down:
-            hero.moveSW()
-        if pressed_right and pressed_down:
-            hero.moveSE()
         if pressed_up:
             hero.moveUp()
         if pressed_down:
@@ -232,32 +227,32 @@ def main():
         if(mondistance < 32):
             monsterdead = True
             
-        for goblin in goblins:
-            gobdirection = random.randint(1,8)
+        for x in range(len(goblins)):
             
             if(change_gobdir <= 0):
-                change_gobdir = 120
-                gobdirection = goblin.getGobDir()
+                change_gobdir = 120          
+                gobdirection = random.randint(1,8)
+                goblins[x].setGobDir(gobdirection)
                 
-            if(gobdirection == 1):
-                goblin.moveRight()
-            elif(gobdirection == 2):
-                goblin.moveLeft()
-            elif(gobdirection == 3):
-                goblin.moveUp()
-            elif(gobdirection == 4):
-                goblin.moveDown()
-            elif(gobdirection == 5):
-                goblin.moveNE()
-            elif(gobdirection == 6):
-                goblin.moveNW()
-            elif(gobdirection == 7):
-                goblin.moveSE()
-            elif(gobdirection == 8):
-                goblin.moveSW()
+            if(goblins[x].getGobDir() == 1):
+                goblins[x].moveRight()
+            elif(goblins[x].getGobDir() == 2):
+                goblins[x].moveLeft()
+            elif(goblins[x].getGobDir() == 3):
+                goblins[x].moveUp()
+            elif(goblins[x].getGobDir() == 4):
+                goblins[x].moveDown()
+            elif(goblins[x].getGobDir() == 5):
+                goblins[x].moveNE()
+            elif(goblins[x].getGobDir() == 6):
+                goblins[x].moveNW()
+            elif(goblins[x].getGobDir() == 7):
+                goblins[x].moveSE()
+            elif(goblins[x].getGobDir() == 8):
+                goblins[x].moveSW()
                 #collision testing
     
-            gobdistance = math.sqrt(((hero.x-goblin.x)**2)+ ((hero.y-goblin.y)**2))
+            gobdistance = math.sqrt(((hero.x-goblins[x].x)**2)+ ((hero.y-goblins[x].y)**2))
                     
             if gobdistance < 32:
                 restart = False
@@ -265,7 +260,8 @@ def main():
                 points = 0
                 goblins.clear()
                 goblins = [Goblin(randomgobx,randomgoby, gSpeed),Goblin(randomgobx2,randomgoby2, gSpeed)]
-            goblin.getWrap()
+                
+            goblins[x].getWrap()
             
         hero.getBorderCollision()
         
@@ -296,7 +292,6 @@ def main():
                 if(randommonx != randomherx and randommony != randomhery):
                     points = points + 1
                     monster = Monster(randommonx,randommony, mSpeed)
-                    # goblin = Goblin(randomgobx, randomgoby, gSpeed)
                     restart = False
                     monsterdead = False
                     heroDead = False
