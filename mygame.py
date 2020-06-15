@@ -5,36 +5,37 @@ import math
 # work on getting audio to work again and drawin xp bar
 
 mSpeed = 2
-gSpeed = 4
-hSpeed = 4
-diagSpeed = 0
+gSpeed = 2
+hSpeed = 3
+points = 0
+
 class Character():
     def __init__(self, startx, starty, speed):
         self.x = startx
         self.y = starty
         self.type = 'character'
-        self.diagSpeed = hSpeed/2
         self.speed = speed
+        
     def moveRight(self):
-        self.x += hSpeed
+        self.x += self.speed
     def moveLeft(self):
-        self.x -= hSpeed
+        self.x -= self.speed
     def moveUp(self):
-        self.y -= hSpeed
+        self.y -= self.speed
     def moveDown(self):
-        self.y += hSpeed
+        self.y += self.speed
     def moveNW(self):
-        self.x -= self.diagSpeed
-        self.y -= self.diagSpeed
+        self.x -= 1
+        self.y -= 1
     def moveNE(self):
-        self.x += self.diagSpeed
-        self.y -= self.diagSpeed
+        self.x += 1
+        self.y -= 1
     def moveSW(self):
-        self.x -= self.diagSpeed
-        self.y += self.diagSpeed
+        self.x -= 1
+        self.y += 1
     def moveSE(self):
-        self.x += self.diagSpeed
-        self.y += self.diagSpeed
+        self.x += 1
+        self.y += 1
     
     def getWrap(self):
         
@@ -53,10 +54,7 @@ class Hero(Character):
         self.y = starty
         self.name = 'hero'
         self.speed = speed
-        self.points = 0
-    
-    def addPoint(self, getPoint):
-        self.points += 1
+        self.diagSpeed = hSpeed/2
 
     def getBorderCollision(self):
         
@@ -127,7 +125,6 @@ def main():
     direction = 0
     gobdirection = 0
     points = 0
-    getPoint = False
     pressed_left = False
     pressed_right = False
     pressed_up = False
@@ -138,13 +135,16 @@ def main():
     loseSoundPlayed = False
     heroDead = False
     restart = False
-    spawned = False
-    monster = Monster(60, 400, mSpeed)
-    hero = Hero(200,200, hSpeed)
+    
+    randommonx = random.randint(0,512)
+    randommony = random.randint(0,480)
     randomgobx = random.randint(0,512)
     randomgoby = random.randint(0,480)
-    goblin = Goblin(randomgobx,randomgoby, gSpeed)
     
+    hero = Hero(175,175, hSpeed)
+    monster = Monster(60, 400, mSpeed)
+    goblin = Goblin(randomgobx,randomgoby, gSpeed)
+    goblins = []
     
     while not stop_game:
         
@@ -182,8 +182,16 @@ def main():
         
         if pressed_left:
             hero.moveLeft()
+        if pressed_left and pressed_up:
+            hero.moveNW()
         if pressed_right:
             hero.moveRight()
+        if pressed_right and pressed_up:
+            hero.moveNE()
+        if pressed_left and pressed_down:
+            hero.moveSW()
+        if pressed_right and pressed_down:
+            hero.moveSE()
         if pressed_up:
             hero.moveUp()
         if pressed_down:
@@ -236,22 +244,13 @@ def main():
         #collision testing
         mondistance = math.sqrt(((hero.x-monster.x)**2) + ((hero.y-monster.y)**2))
         gobdistance = math.sqrt(((hero.x-goblin.x)**2)+ ((hero.y-goblin.y)**2))
-        if(mondistance < 32):
-            getPoint = True
-            monsterdead = True
-            restart = False
         
-        if(getPoint == True):
-            hero.addPoint(getPoint)
-            getPoint = False
-            print(f"Points: {hero.points}")
-            XPBarSize = hero.points
+        if(mondistance < 32):
+            monsterdead = True
             
         if gobdistance < 32:
             restart = False
-            loseSoundPlayed = True
             heroDead = True
-            points = 0
 
         # screen wrapping logic
         monster.getWrap()
@@ -259,16 +258,7 @@ def main():
         hero.getBorderCollision()
         
         # Draw background
-        screen.blit(background_image,(0,0))
-        
-        if(heroDead == False):
-            screen.blit(hero_image, (hero.x,hero.y))
-            
-        screen.blit(goblin_image, (goblin.x,goblin.y))
-        
-        if(monsterdead == False):
-            screen.blit(monster_image, (monster.x,monster.y))
-        
+        screen.blit(background_image,(0,0))    
         ## put xp bar drawing here.
         #screen.blit( (30,430)
         
@@ -278,21 +268,20 @@ def main():
                 winSound.play(loops=0)
                 winSoundPlayed = True
             
-        if loseSoundPlayed == True:
-            loseSound.set_volume(0.1)
-            if loseSoundPlayed == False:
+            if loseSoundPlayed == True:
+                loseSound.set_volume(0.1)
                 loseSound.play(loops=0)
-                loseSoundPlayed = True
+                loseSoundPlayed = False
 
-            if restart == False:
-                font = pygame.font.Font('freesansbold.ttf',32)
-                white = (255,255,255)
-                blue = (0,0,128)
-                text = font.render('Hit Enter to Play Again', True, blue, white)
-                screen.blit(text,(80,220))
+        if restart == False and heroDead == True:
+            font = pygame.font.Font('freesansbold.ttf',32)
+            white = (255,255,255)
+            blue = (0,0,128)
+            text = font.render('Hit Enter to Play Again', True, blue, white)
+            screen.blit(text,(80,220))
         
-        if(restart == True):
-            while spawned == False:
+        if(monsterdead == True):
+            while monsterdead == True:
                 randommonx = random.randint(0,512)
                 randommony = random.randint(0,480)
                 randomherx = random.randint(30,480)
@@ -300,19 +289,31 @@ def main():
                 randomgobx = random.randint(0,512)
                 randomgoby = random.randint(0,480)
                 
-                if(randommonx != randomherx and randommony != randomherx):
+                if(randommonx != randomherx and randommony != randomhery):
+                    points = points + 1
                     monster = Monster(randommonx,randommony, mSpeed)
-                    hero = Hero(randomherx, randomhery, hSpeed)
-                    goblin = Goblin(randomgobx, randomgoby, gSpeed)
-                    spawned = True
+                    # goblin = Goblin(randomgobx, randomgoby, gSpeed)
                     restart = False
+                    monsterdead = False
+                    heroDead = False
+        
+        if(heroDead == False):
+            screen.blit(hero_image, (hero.x,hero.y))
+            
+        screen.blit(goblin_image, (goblin.x,goblin.y))
+        
+        if(monsterdead == False):
+            screen.blit(monster_image, (monster.x,monster.y))
+        
+        #drawXP
+        xpbarX = points*10
+        screen.blit()
+        
         #this essentially resfreshes the screen
         pygame.display.update()
 
         clock.tick(60) #controls framerate
 
-
-        
 
     if(stop_game == True):
         pygame.quit()
